@@ -1,11 +1,9 @@
 # tools/search_tool.py
-from langchain.tools import tool
-import requests
+from langchain.tools import DuckDuckGoSearchRun, Tool
 
-@tool
-def search_fitness(query: str) -> str:
-    """Performs a web search using DuckDuckGo to return a short summary."""
-    response = requests.get(f"https://api.duckduckgo.com/?q={query}&format=json")
-    if response.status_code == 200:
-        return response.json().get("AbstractText", "No summary found.")
-    return "Search failed."
+search_tool = DuckDuckGoSearchRun()
+search_fitness = Tool(
+    name="search_fitness",
+    func=search_tool.run,
+    description="Search the web for fitness queries using DuckDuckGo and answer in English answer only what is asked ."
+)
