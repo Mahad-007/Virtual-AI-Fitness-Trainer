@@ -8,6 +8,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain_groq import ChatGroq
+from langchain.prompts import PromptTemplate
 
 
 load_dotenv()
@@ -53,8 +54,22 @@ with st.form("calorie_form"):
      st.info(result)
 
 st.divider()
+search_prompt = PromptTemplate(
+    input_variables=["query", "search_results"],
+    template=(
+        "You are a knowledgeable fitness AI assistant.\n"
+        "User asked: {query}\n\n"
+        "Here are raw search results:\n{search_results}\n\n"
+        "Based on these, provide a concise, accurate, cited answer."
+    )
+)
+search_chain = LLMChain(llm=llm, prompt=search_prompt)
+
+# Streamlit UI section
 st.subheader("🌐 Ask Fitness Questions")
 query = st.text_input("Ask something like 'Best protein sources'")
+
 if st.button("Search"):
-    answer = search_fitness.invoke({"query": query})
+    raw = search_fitness.invoke({"query": query})
+    answer = search_chain.run(query=query, search_results=raw)
     st.write(answer)
